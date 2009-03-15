@@ -492,6 +492,7 @@ abstract class Site extends CallbackManager
                     ob_end_flush();
                 } else {
                     ob_end_clean();
+                    $outTitle = 'Unhandled Exception';
                     $this->formatException($ex, 'Unhandled ');
                 }
             } catch (Exception $rex) {
