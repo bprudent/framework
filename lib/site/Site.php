@@ -298,7 +298,6 @@ abstract class Site extends CallbackManager
             $this->config->compile();
             $this->dispatchCallback('onPostConfig', $this);
         } catch (SiteConfigParseException $ex) {
-            header('Status: 500 Internal Error');
             $this->printErrorPage(
                 'Error loading onfiguration',
                 "<h1>Error loading configuration:</h1>\n".
