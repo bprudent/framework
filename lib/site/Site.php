@@ -485,20 +485,27 @@ abstract class Site extends CallbackManager
             ob_start();
             $outTitle = null;
 
-            try {
-                ob_start();
-                $this->dispatchCallback('onException', $this, $ex);
-                if (ob_get_length()) {
-                    ob_end_flush();
-                } else {
-                    ob_end_clean();
-                    $outTitle = 'Unhandled Exception';
-                    $this->formatException($ex, 'Unhandled ');
+            if ($ex instanceof SiteConfigException) {
+                $outTitle = 'Site Configuration Error';
+                print
+                    "<h2>Site Configuration Error</h2>\n".
+                    "<h3>".$ex->getMessage()."</h3>\n";
+            } else {
+                try {
+                    ob_start();
+                    // $this->dispatchCallback('onException', $this, $ex);
+                    if (ob_get_length()) {
+                        ob_end_flush();
+                    } else {
+                        ob_end_clean();
+                        $outTitle = 'Unhandled Exception';
+                        $this->formatException($ex, 'Unhandled ');
+                    }
+                } catch (Exception $rex) {
+                    $outTitle = 'Broken exception handler';
+                    $this->formatException($rex, 'Broken ');
+                    $this->formatException($ex, 'Original ');
                 }
-            } catch (Exception $rex) {
-                $outTitle = 'Broken exception handler';
-                $this->formatException($rex, 'Broken ');
-                $this->formatException($ex, 'Original ');
             }
 
             $mess = ob_get_clean();

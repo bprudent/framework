@@ -628,4 +628,12 @@ class SiteConfigParseException extends RuntimeException
     }
 }
 
+class SiteConfigException extends RuntimeException
+{
+    public function __construct($path, $mess)
+    {
+        parent::__construct("error in config path [$path]: $mess");
+    }
+}
+
 ?>
