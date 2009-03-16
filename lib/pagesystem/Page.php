@@ -121,7 +121,11 @@ class Page extends CallbackManager
         $this->site = $site;
         $this->buffers = array();
         $this->data = array();
-        $this->type = $type;
+        if (is_array($type) || strpos($type, ',') !== false) {
+            $this->negotiateType($type);
+        } else {
+            $this->type = $type;
+        }
         if (isset($template)) {
             if ($template === false) {
                 $this->template = null;
@@ -139,6 +143,77 @@ class Page extends CallbackManager
             $this->template;
         $this->headers = new PageHeaders();
         $this->headers->setContentType($this->type);
+    }
+
+    /**
+     * Negotiates the type of the page based on the intersection of what's
+     * available, and what the client accepts
+     *
+     * Sets the $type property to the determined type
+     *
+     * @param avail array of mime types that are available to be sreved
+     * @return void
+     */
+    protected function negotiateType($avail)
+    {
+        if (! is_array($avail))
+            $avail = preg_split('/,\s*/', $avail);
+
+        $accept = Params::SERVER('HTTP_ACCEPT', 'text/html');
+
+        # Fix IE brokeness
+        if (stripos(Params::SERVER('HTTP_USER_AGENT', ''), 'msie') !== false) {
+            # In IE 6, the script sets the Accept header to 'foo/bar', yet IE sends '*/*, foo/bar'
+            $accept = preg_replace('~^\*/\*,\s*~i', '', $accept);
+        }
+
+        $matches = null;
+        $types = array();
+        foreach (preg_split('/,\s*/', $accept) as $type) {
+            if (($i = strpos($type, ';')) !== false) {
+                if (preg_match('/q=([\d\.]+)/', substr($type, $i), $matches)) {
+                    $q = (float) $matches[1];
+                } else {
+                    $q = 1.0;
+                }
+                $types[substr($type, 0, $i)] = $q;
+            } else {
+                $types[$type] = 1.0;
+            }
+        }
+
+        arsort($types);
+        foreach (array_keys($types) as $acceptedType) {
+            if (in_array($acceptedType, $avail)) {
+                $this->type = $acceptedType;
+                break;
+            } else {
+                $pat = array();
+                foreach (explode('/', $acceptedType) as $part) {
+                    if ($part == '*') {
+                        array_push($pat, '.+');
+                    } else {
+                        array_push($pat, $part);
+                    }
+                }
+                $pat = '/^'.implode('\\/', $pat).'$/';
+                foreach ($avail as $type) {
+                    if (preg_match($pat, $type)) {
+                        $this->type = $type;
+                        break;
+                    }
+                }
+                if (isset($this->type)) {
+                    break;
+                }
+            }
+        }
+        if (! isset($this->type)) {
+            $avail = implode(', ', $avail);
+            throw new RuntimeException(
+                "unable to negotiate page type, available: $avail accepted: $accept"
+            );
+        }
     }
 
     public function getSite()
