@@ -46,6 +46,7 @@ class SiteRedirectException extends Exception
 
     public function __construct($url)
     {
+        $url = Site::Site()->rel2abs($url);
         $this->url = $url;
         parent::__construct("Redirect to $url");
     }
