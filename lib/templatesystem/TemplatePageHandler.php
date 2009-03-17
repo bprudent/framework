@@ -194,9 +194,8 @@ class TemplatePageHandler extends PHPSTLNSHandler
      *   <link href="some/resource" rel="something" type="some/mime" />
      *   <alternate href="some.rss" type="application/rss+xml" title="RSS Feed" />
      *
-     * If any href is a simple string (i.e. no ${...} expression), and it is
-     * relative, it will be passed to CurrentPath->url->down to form an
-     * absolute url.
+     * Urls are relative to Template::$path unless the base attribute is
+     * specified on the <page:addAssets /> element
      *
      * Full gory attribute details:
      *   script: a HTMLPageScript asset
@@ -295,7 +294,7 @@ class TemplatePageHandler extends PHPSTLNSHandler
             if ($element->hasAttribute('base')) {
                 $base = 'new StupidPath('.$this->getAttr($element, 'base').')';
             } else {
-                $base = 'CurrentPath::get()->url';
+                $base = '$this->path';
             }
             $this->compiler->write("<?php\n$baseVar = $base;\n$buffer?>");
         }

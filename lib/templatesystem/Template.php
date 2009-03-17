@@ -38,6 +38,16 @@
 
 class Template extends PHPSTLTemplate
 {
+    /**
+     * The url path that this template "resides" in.
+     *
+     * If this template is file based, this will correspond to the directory
+     * that the template was found in if that's under the site's directory;
+     * otherwise, this will be Site::$url.
+     *
+     * @var StupidPath
+     */
+    public $path;
 
     public function __construct(
         PHPSTLTemplateProvider $provider,
@@ -46,30 +56,21 @@ class Template extends PHPSTLTemplate
     ) {
         parent::__construct($provider, $resource, $identifier);
 
-        // Stash away the current path for when we render
-        $this->currentPath = CurrentPath::get();
-    }
+        $this->path = new StupidPath(Site::Site()->url);
 
-    /**
-     * Sets the application path when this template is rendered.
-     */
-    private $oldAppPath=null;
-    protected function renderSetup($args)
-    {
-        parent::renderSetup($args);
-        if (isset($this->currentPath)) {
-            $this->oldAppPath = CurrentPath::set($this->currentPath);
-        }
-    }
-
-    /**
-     * Restores the application path after template is rendered.
-     */
-    protected function renderCleanup()
-    {
-        parent::renderCleanup();
-        if (isset($this->currentPath)) {
-            CurrentPath::set($this->oldAppPath);
+        if (substr($identifier, 0, 7) == 'file://') {
+            $path = dirname(substr($identifier, 7));
+            $pl = strlen($path);
+            foreach (array(
+                Loader::$FrameworkPath.'/',
+                Loader::$Base.'/'
+            ) as $p) {
+                $l = strlen($p);
+                if ($pl > $l && substr($path, 0, $l) == $p) {
+                    $this->path = $this->path->down(substr($path, $l));
+                    break;
+                }
+            }
         }
     }
 }
