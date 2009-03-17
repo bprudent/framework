@@ -225,11 +225,6 @@ class TemplatePageHandler extends PHPSTLNSHandler
      */
     public function handleElementAddAssets(DOMElement $element)
     {
-        if ($element->hasAttribute('base')) {
-            $base = 'new StupidPath('.$this->getAttr($element, 'base').')';
-        } else {
-            $base = 'CurrentPath::get()->url';
-        }
         $this->compiler->write(
             "<?php if (! \$page instanceof HTMLPage) {\n".
             "  throw new RuntimeException('Can only add html assets to an html page');\n".
@@ -240,7 +235,6 @@ class TemplatePageHandler extends PHPSTLNSHandler
         foreach ($element->childNodes as $n) {
             if ($n->nodeType == XML_ELEMENT_NODE) {
                 $href = $this->requiredAttr($n, 'href');
-                $path = CurrentPath::get();
                 $href = "(string) ${baseVar}->rel2abs($href)";
                 switch ($n->tagName) {
                 case 'script':
@@ -298,10 +292,12 @@ class TemplatePageHandler extends PHPSTLNSHandler
             foreach ($assets as $asset) {
                 $buffer .= "\$page->addAsset($asset);\n";
             }
-            $this->compiler->write("<?php\n".
-                "$baseVar = $base;\n".
-                $buffer.
-            "?>");
+            if ($element->hasAttribute('base')) {
+                $base = 'new StupidPath('.$this->getAttr($element, 'base').')';
+            } else {
+                $base = 'CurrentPath::get()->url';
+            }
+            $this->compiler->write("<?php\n$baseVar = $base;\n$buffer?>");
         }
     }
 }
