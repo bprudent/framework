@@ -36,6 +36,8 @@
  * ***** END LICENSE BLOCK *****
  */
 
+require_once 'lib/util/StupidPath.php';
+
 /**
  * Singleton php-stl template
  */

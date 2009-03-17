@@ -37,7 +37,6 @@
  */
 
 require_once 'lib/util/CallbackManager.php';
-require_once 'lib/util/CurrentPath.php';
 require_once 'lib/util/Params.php';
 require_once 'lib/site/SiteConfig.php';
 require_once 'lib/site/SiteLayout.php';
@@ -410,8 +409,6 @@ abstract class Site extends CallbackManager
         $args = array_slice(func_get_args(), 1);
         try {
             ob_start();
-
-            CurrentPath::set(Loader::$Base);
 
             $this->parseUrl(Params::server('REQUEST_URI'));
             $this->log->info(sprintf(
