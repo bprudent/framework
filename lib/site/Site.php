@@ -490,7 +490,7 @@ abstract class Site extends CallbackManager
             } else {
                 try {
                     ob_start();
-                    // $this->dispatchCallback('onException', $this, $ex);
+                    $this->dispatchCallback('onException', $this, $ex);
                     if (ob_get_length()) {
                         ob_end_flush();
                     } else {

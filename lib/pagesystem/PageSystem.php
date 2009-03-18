@@ -76,8 +76,8 @@ class PageSystem extends SiteModule
     {
         new ContentPageProvider($this);
 
-        $this->site->addCallback('onException', array($this, 'onException'));
-        $this->site->addCallback('onParseUrl', array($this, 'onParseUrl'));
+        $this->site->addCallback('onException',    array($this, 'onException'));
+        $this->site->addCallback('onParseUrl',     array($this, 'onParseUrl'));
         $this->site->addCallback('onSendResponse', array($this, 'renderCurrentPage'));
     }
 
@@ -105,7 +105,7 @@ class PageSystem extends SiteModule
         $this->dispatchCallback('onPageResolved', $this, $this->currentPage);
     }
 
-    public function renderCurrentPage(Site $site)
+    public function renderCurrentPage()
     {
         if (isset($this->currentPage)) {
             $this->currentPage->render();
@@ -123,7 +123,7 @@ class PageSystem extends SiteModule
     public function onException(Site $site, Exception $ex)
     {
         $this->currentPage = new ExceptionPage($this->site, $ex, $this->currentPage);
-        $this->renderCurrentPage($site);
+        $this->renderCurrentPage();
     }
 
     /**
