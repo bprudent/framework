@@ -56,6 +56,13 @@ class PageSystem extends SiteModule
      */
     protected $currentPage;
 
+    /**
+     * The provider responsible for the $currentPage
+     *
+     * @var PageProvider
+     */
+    protected $responsibleProvider;
+
     public function initialize()
     {
         parent::initialize();
@@ -86,6 +93,7 @@ class PageSystem extends SiteModule
         foreach ($this->providers as $provider) {
             $r = $provider->resolve($this->site->requestUrl);
             if ($r === PageProvider::FAIL || $r instanceof Page) {
+                $this->responsibleProvider = $provider;
                 $this->currentPage = $r;
                 break;
             } elseif (isset($r)) {
