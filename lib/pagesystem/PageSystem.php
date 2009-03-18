@@ -130,7 +130,28 @@ class PageSystem extends SiteModule
      */
     public function onException(Site $site, Exception $ex)
     {
-        $this->currentPage = new ExceptionPage($this->site, $ex, $this->currentPage);
+        if (isset($this->responsibleProvider)) {
+            $this->currentPage =
+                $this->responsibleProvider->provideExceptionPage($ex, true);
+        }
+        if (! isset($this->currentPage)) {
+            foreach ($this->providers as $provider) {
+                if ($provider !== $this->responsibleProvider) {
+                    $this->currentPage =
+                        $provider->provideExceptionPage($ex, false);
+                    if (isset($this->currentPage)) {
+                        $this->responsibleProvider = $provider;
+                        break;
+                    }
+                }
+            }
+        }
+        if (! isset($this->currentPage)) {
+            $this->currentPage = new ExceptionPage(
+                $this->site, $ex, $this->currentPage
+            );
+            $this->responsibleProvider = null;
+        }
         $this->renderCurrentPage();
     }
 

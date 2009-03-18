@@ -55,6 +55,19 @@ abstract class PageProvider
     }
 
     /**
+     * Allows the provider to handle exception rendering.
+     *
+     * @param Exception $ex
+     * @param boolean $isResponsible true if this provider is responsible for
+     * the current page, false otherwise
+     * @return Page or null
+     */
+    public function provideExceptionPage(Exception $ex, $isResponsible)
+    {
+        return null;
+    }
+
+    /**
      * Called to ask the provider to resolve an url to a Page object
      *
      * @param url string, the url being served, relative to Site::$url
